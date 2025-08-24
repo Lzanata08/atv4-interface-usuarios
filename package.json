@@ -1,0 +1,23 @@
+{
+  "name": "hotel-reservas-system",
+  "version": "1.0.0",
+  "description": "Sistema de reservas de hotel com JSON Server",
+  "main": "index.html",
+  "scripts": {
+    "start": "json-server --watch db.json --port 3000",
+    "dev": "json-server --watch db.json --port 3000 --delay 500",
+    "install-deps": "npm install -g json-server"
+  },
+  "keywords": [
+    "hotel",
+    "reservas",
+    "json-server",
+    "bootstrap",
+    "javascript"
+  ],
+  "author": "Hotel System",
+  "license": "MIT",
+  "devDependencies": {
+    "json-server": "^0.17.4"
+  }
+}

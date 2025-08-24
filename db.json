@@ -1,0 +1,40 @@
+{
+  "reservas": [
+    {
+      "id": 1,
+      "nome": "João Silva",
+      "email": "joao.silva@email.com",
+      "dataEntrada": "2025-08-25",
+      "dataSaida": "2025-08-28",
+      "adultos": "2",
+      "criancas": "1",
+      "observacoes": "Preferência por quarto com vista para o mar",
+      "dataReserva": "2025-08-23T10:30:00.000Z",
+      "status": "Pendente"
+    },
+    {
+      "id": 2,
+      "nome": "Maria Santos",
+      "email": "maria.santos@email.com",
+      "dataEntrada": "2025-08-30",
+      "dataSaida": "2025-09-02",
+      "adultos": "1",
+      "criancas": "0",
+      "observacoes": "Chegada após as 22h",
+      "dataReserva": "2025-08-23T14:15:00.000Z",
+      "status": "Confirmada"
+    },
+    {
+      "id": 3,
+      "nome": "Pedro Oliveira",
+      "email": "pedro.oliveira@email.com",
+      "dataEntrada": "2025-09-05",
+      "dataSaida": "2025-09-10",
+      "adultos": "2",
+      "criancas": "2",
+      "observacoes": "Necessário berço para bebê",
+      "dataReserva": "2025-08-23T16:45:00.000Z",
+      "status": "Confirmada"
+    }
+  ]
+}

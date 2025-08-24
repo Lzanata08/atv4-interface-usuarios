@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Reservas - Hotel</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --gold-color: #f39c12;
+            --light-bg: #f8f9fa;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: var(--light-bg);
+        }
+
+        .header-section {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            color: white;
+            padding: 60px 0 40px;
+        }
+
+        .main-content {
+            margin-top: -30px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .reservas-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            margin-bottom: 30px;
+        }
+
+        .table-responsive {
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+
+        .table th {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            border: none;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            letter-spacing: 0.5px;
+            padding: 15px 12px;
+        }
+
+        .table td {
+            padding: 15px 12px;
+            vertical-align: middle;
+            border-color: #f0f0f0;
+        }
+
+        .table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f8f9ff;
+            transform: scale(1.01);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pendente {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+        }
+
+        .status-confirmada {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+        }
+
+        .status-cancelada {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .btn-action {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.9em;
+            margin: 0 2px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-edit {
+            background: linear-gradient(135deg, var(--accent-color), #5dade2);
+            color: white;
+        }
+
+        .btn-delete {
+            background: linear-gradient(135deg, #e74c3c, #ec7063);
+            color: white;
+        }
+
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+
+        .stats-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            color: white;
+            font-size: 24px;
+        }
+
+        .stats-total { background: linear-gradient(135deg, var(--accent-color), #5dade2); }
+        .stats-pendente { background: linear-gradient(135deg, #f39c12, #e67e22); }
+        .stats-confirmada { background: linear-gradient(135deg, #27ae60, #2ecc71); }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: var(--accent-color);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+        }
+
+        .empty-state i {
+            font-size: 4em;
+            margin-bottom: 20px;
+            color: #ddd;
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .search-box input {
+            border-radius: 25px;
+            border: 2px solid #e0e0e0;
+            padding: 12px 20px 12px 50px;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .reservas-card {
+                padding: 20px;
+                margin: 0 10px 20px;
+                border-radius: 15px;
+            }
+            
+            .table-responsive {
+                font-size: 0.9em;
+            }
+            
+            .stats-card {
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-primary fs-3" href="atv4.html">
+                <i class="fas fa-hotel me-2"></i>HOTEL LOGO
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="atv4.html">Início</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="reservas.html">Gerenciar Reservas</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header Section -->
+    <section class="header-section">
+        <div class="container">
+            <div class="text-center">
+                <h1 class="display-4 fw-bold mb-3">
+                    <i class="fas fa-calendar-check me-3"></i>Gerenciar Reservas
+                </h1>
+                <p class="lead">Visualize e gerencie todas as solicitações de reserva</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <section class="main-content">
+        <div class="container">
+            <!-- Statistics Cards -->
+            <div class="row mb-4" id="statsContainer">
+                <div class="col-lg-4 col-md-4">
+                    <div class="stats-card">
+                        <div class="stats-icon stats-total">
+                            <i class="fas fa-list"></i>
+                        </div>
+                        <h3 class="mb-1" id="totalReservas">-</h3>
+                        <p class="text-muted mb-0">Total de Reservas</p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-4">
+                    <div class="stats-card">
+                        <div class="stats-icon stats-pendente">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <h3 class="mb-1" id="pendentesReservas">-</h3>
+                        <p class="text-muted mb-0">Pendentes</p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-4">
+                    <div class="stats-card">
+                        <div class="stats-icon stats-confirmada">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h3 class="mb-1" id="confirmadasReservas">-</h3>
+                        <p class="text-muted mb-0">Confirmadas</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Card -->
+            <div class="reservas-card">
+                <!-- Search Box -->
+                <div class="search-box">
+                    <input type="text" class="form-control" id="searchInput" placeholder="Buscar por nome, email ou status...">
+                    <i class="fas fa-search"></i>
+                </div>
+
+                <!-- Loading State -->
+                <div id="loadingState" class="loading">
+                    <i class="fas fa-spinner fa-spin fa-3x mb-3"></i>
+                    <h4>Carregando reservas...</h4>
+                </div>
+
+                <!-- Empty State -->
+                <div id="emptyState" class="empty-state" style="display: none;">
+                    <i class="fas fa-calendar-times"></i>
+                    <h4>Nenhuma reserva encontrada</h4>
+                    <p>Não há reservas cadastradas no momento.</p>
+                </div>
+
+                <!-- Table -->
+                <div id="tableContainer" style="display: none;">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nome</th>
+                                    <th>Email</th>
+                                    <th>Check-in</th>
+                                    <th>Check-out</th>
+                                    <th>Hóspedes</th>
+                                    <th>Status</th>
+                                    <th>Data da Reserva</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reservasTableBody">
+                                <!-- Reservas serão inseridas aqui via JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal para Editar/Visualizar Reserva -->
+    <div class="modal fade" id="reservaModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-edit me-2"></i>Detalhes da Reserva
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editReservaForm">
+                        <input type="hidden" id="editReservaId">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Nome</label>
+                                <input type="text" class="form-control" id="editNome" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" id="editEmail" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Data de Entrada</label>
+                                <input type="date" class="form-control" id="editDataEntrada" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Data de Saída</label>
+                                <input type="date" class="form-control" id="editDataSaida" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Adultos</label>
+                                <input type="number" class="form-control" id="editAdultos" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Crianças</label>
+                                <input type="number" class="form-control" id="editCriancas" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Status</label>
+                                <select class="form-select" id="editStatus">
+                                    <option value="Pendente">Pendente</option>
+                                    <option value="Confirmada">Confirmada</option>
+                                    <option value="Cancelada">Cancelada</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Data da Reserva</label>
+                                <input type="text" class="form-control" id="editDataReserva" readonly>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Observações</label>
+                                <textarea class="form-control" id="editObservacoes" rows="3" readonly></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary" id="saveReservaBtn">
+                        <i class="fas fa-save me-2"></i>Salvar Alterações
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let reservasData = [];
+        let filteredData = [];
+        
+        // Load reservas when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadReservas();
+            setupSearchFilter();
+        });
+
+        async function loadReservas() {
+            try {
+                const response = await fetch('http://localhost:3000/reservas');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                reservasData = await response.json();
+                filteredData = [...reservasData];
+                
+                displayReservas();
+                updateStatistics();
+                
+                document.getElementById('loadingState').style.display = 'none';
+                
+                if (reservasData.length === 0) {
+                    document.getElementById('emptyState').style.display = 'block';
+                } else {
+                    document.getElementById('tableContainer').style.display = 'block';
+                }
+                
+            } catch (error) {
+                console.error('Erro ao carregar reservas:', error);
+                document.getElementById('loadingState').innerHTML = `
+                    <i class="fas fa-exclamation-triangle fa-3x mb-3 text-warning"></i>
+                    <h4>Erro ao carregar reservas</h4>
+                    <p>Certifique-se de que o JSON Server está rodando na porta 3000.</p>
+                    <button class="btn btn-primary" onclick="loadReservas()">
+                        <i class="fas fa-sync me-2"></i>Tentar Novamente
+                    </button>
+                `;
+            }
+        }
+
+        function displayReservas() {
+            const tbody = document.getElementById('reservasTableBody');
+            tbody.innerHTML = '';
+
+            if (filteredData.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="text-center py-4">
+                            <i class="fas fa-search fa-2x text-muted mb-2"></i>
+                            <p class="text-muted">Nenhuma reserva encontrada com os critérios de busca.</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            filteredData.forEach(reserva => {
+                const dataReserva = new Date(reserva.dataReserva).toLocaleDateString('pt-BR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                const dataEntrada = new Date(reserva.dataEntrada).toLocaleDateString('pt-BR');
+                const dataSaida = new Date(reserva.dataSaida).toLocaleDateString('pt-BR');
+
+                const statusClass = reserva.status.toLowerCase().replace('ç', 'c').replace('ã', 'a');
+                
+                const row = `
+                    <tr>
+                        <td><strong>#${reserva.id}</strong></td>
+                        <td>${reserva.nome}</td>
+                        <td>${reserva.email}</td>
+                        <td>${dataEntrada}</td>
+                        <td>${dataSaida}</td>
+                        <td>
+                            <i class="fas fa-user me-1"></i>${reserva.adultos}
+                            ${reserva.criancas > 0 ? `<i class="fas fa-child ms-2 me-1"></i>${reserva.criancas}` : ''}
+                        </td>
+                        <td>
+                            <span class="status-badge status-${statusClass}">
+                                ${reserva.status}
+                            </span>
+                        </td>
+                        <td>${dataReserva}</td>
+                        <td>
+                            <button class="btn btn-action btn-edit" onclick="editReserva(${reserva.id})" title="Editar">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-action btn-delete" onclick="deleteReserva(${reserva.id})" title="Excluir">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                
+                tbody.innerHTML += row;
+            });
+        }
+
+        function updateStatistics() {
+            const total = reservasData.length;
+            const pendentes = reservasData.filter(r => r.status === 'Pendente').length;
+            const confirmadas = reservasData.filter(r => r.status === 'Confirmada').length;
+
+            document.getElementById('totalReservas').textContent = total;
+            document.getElementById('pendentesReservas').textContent = pendentes;
+            document.getElementById('confirmadasReservas').textContent = confirmadas;
+        }
+
+        function setupSearchFilter() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                
+                filteredData = reservasData.filter(reserva => {
+                    return reserva.nome.toLowerCase().includes(searchTerm) ||
+                           reserva.email.toLowerCase().includes(searchTerm) ||
+                           reserva.status.toLowerCase().includes(searchTerm);
+                });
+                
+                displayReservas();
+            });
+        }
+
+        async function editReserva(id) {
+            const reserva = reservasData.find(r => r.id === id);
+            if (!reserva) return;
+
+            // Preencher modal com dados da reserva
+            document.getElementById('editReservaId').value = reserva.id;
+            document.getElementById('editNome').value = reserva.nome;
+            document.getElementById('editEmail').value = reserva.email;
+            document.getElementById('editDataEntrada').value = reserva.dataEntrada;
+            document.getElementById('editDataSaida').value = reserva.dataSaida;
+            document.getElementById('editAdultos').value = reserva.adultos;
+            document.getElementById('editCriancas').value = reserva.criancas;
+            document.getElementById('editStatus').value = reserva.status;
+            document.getElementById('editObservacoes').value = reserva.observacoes || '';
+            
+            const dataReserva = new Date(reserva.dataReserva).toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            document.getElementById('editDataReserva').value = dataReserva;
+
+            // Mostrar modal
+            const modal = new bootstrap.Modal(document.getElementById('reservaModal'));
+            modal.show();
+        }
+
+        async function deleteReserva(id) {
+            const reserva = reservasData.find(r => r.id === id);
+            if (!reserva) return;
+
+            if (confirm(`Tem certeza que deseja excluir a reserva de ${reserva.nome}?`)) {
+                try {
+                    const response = await fetch(`http://localhost:3000/reservas/${id}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (response.ok) {
+                        // Remover da lista local
+                        reservasData = reservasData.filter(r => r.id !== id);
+                        filteredData = filteredData.filter(r => r.id !== id);
+                        
+                        displayReservas();
+                        updateStatistics();
+                        
+                        // Show success message
+                        showNotification('Reserva excluída com sucesso!', 'success');
+                    } else {
+                        throw new Error('Erro ao excluir reserva');
+                    }
+                } catch (error) {
+                    console.error('Erro:', error);
+                    showNotification('Erro ao excluir reserva. Tente novamente.', 'error');
+                }
+            }
+        }
+
+        // Save reserva changes
+        document.getElementById('saveReservaBtn').addEventListener('click', async function() {
+            const id = document.getElementById('editReservaId').value;
+            const status = document.getElementById('editStatus').value;
+            
+            const reserva = reservasData.find(r => r.id == id);
+            if (!reserva) return;
+
+            try {
+                const updatedReserva = {
+                    ...reserva,
+                    status: status
+                };
+
+                const response = await fetch(`http://localhost:3000/reservas/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updatedReserva)
+                });
+
+                if (response.ok) {
+                    // Atualizar na lista local
+                    const index = reservasData.findIndex(r => r.id == id);
+                    if (index !== -1) {
+                        reservasData[index] = updatedReserva;
+                    }
+                    
+                    // Atualizar filteredData também
+                    const filteredIndex = filteredData.findIndex(r => r.id == id);
+                    if (filteredIndex !== -1) {
+                        filteredData[filteredIndex] = updatedReserva;
+                    }
+                    
+                    displayReservas();
+                    updateStatistics();
+                    
+                    // Fechar modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('reservaModal'));
+                    modal.hide();
+                    
+                    showNotification('Reserva atualizada com sucesso!', 'success');
+                } else {
+                    throw new Error('Erro ao atualizar reserva');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                showNotification('Erro ao atualizar reserva. Tente novamente.', 'error');
+            }
+        });
+
+        function showNotification(message, type) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

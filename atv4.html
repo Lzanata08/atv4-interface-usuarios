@@ -171,9 +171,7 @@
 <body>
     <!-- Header -->
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
-        <div class="container">
-            <a class="navbar-brand fw-bold text-primary fs-3" href="#">
-                <i class="fas fa-hotel me-2"></i>HOTEL LOGO
+       
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -190,7 +188,7 @@
                         <a class="nav-link" href="#reserva">Reservas</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Contato</a>
+                        <a class="nav-link" href="reservas.html">Gerenciar Reservas</a>
                     </li>
                 </ul>
             </div>
@@ -292,35 +290,35 @@
                         <p class="text-muted">Entre em contato conosco informando as datas desejadas. Lhe retornaremos informando a disponibilidade e repassando detalhes da reserva.</p>
                     </div>
                     <div class="col-lg-8">
-                        <form>
+                        <form id="reservaForm">
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <div class="form-floating">
-                                        <input type="text" class="form-control" id="nome" placeholder="Nome">
+                                        <input type="text" class="form-control" id="nome" name="nome" placeholder="Nome" required>
                                         <label for="nome">Nome</label>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-floating">
-                                        <input type="email" class="form-control" id="email" placeholder="E-mail">
+                                        <input type="email" class="form-control" id="email" name="email" placeholder="E-mail" required>
                                         <label for="email">E-mail</label>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-floating">
-                                        <input type="date" class="form-control" id="dataEntrada">
+                                        <input type="date" class="form-control" id="dataEntrada" name="dataEntrada" required>
                                         <label for="dataEntrada">Data de entrada</label>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-floating">
-                                        <input type="date" class="form-control" id="dataSaida">
+                                        <input type="date" class="form-control" id="dataSaida" name="dataSaida" required>
                                         <label for="dataSaida">Data de Saída</label>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-floating">
-                                        <select class="form-select" id="adultos">
+                                        <select class="form-select" id="adultos" name="adultos" required>
                                             <option value="1">1</option>
                                             <option value="2">2</option>
                                             <option value="3">3</option>
@@ -331,7 +329,7 @@
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-floating">
-                                        <select class="form-select" id="criancas">
+                                        <select class="form-select" id="criancas" name="criancas">
                                             <option value="0">0</option>
                                             <option value="1">1</option>
                                             <option value="2">2</option>
@@ -343,7 +341,7 @@
                                 <div class="col-md-6"></div>
                                 <div class="col-12">
                                     <div class="form-floating">
-                                        <textarea class="form-control" id="observacoes" style="height: 100px" placeholder="Observações"></textarea>
+                                        <textarea class="form-control" id="observacoes" name="observacoes" style="height: 100px" placeholder="Observações"></textarea>
                                         <label for="observacoes">Observações</label>
                                     </div>
                                 </div>
@@ -402,8 +400,8 @@
             });
         });
 
-        // Form submission handler
-        document.querySelector('form').addEventListener('submit', function(e) {
+        // Form submission handler with AJAX
+        document.querySelector('form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             // Get form data
@@ -413,11 +411,43 @@
                 data[key] = value;
             });
             
-            // Show success message
-            alert('Sua reserva foi enviada com sucesso! Entraremos em contato em breve.');
+            // Add additional data
+            data.dataReserva = new Date().toISOString();
+            data.status = 'Pendente';
             
-            // Reset form
-            this.reset();
+            // Show loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enviando...';
+            submitBtn.disabled = true;
+            
+            try {
+                // Send data to JSON Server
+                const response = await fetch('http://localhost:3000/reservas', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    // Show success message
+                    alert('Sua reserva foi enviada com sucesso! Entraremos em contato em breve.');
+                    
+                    // Reset form
+                    this.reset();
+                } else {
+                    throw new Error('Erro ao enviar reserva');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao enviar reserva. Tente novamente mais tarde.');
+            } finally {
+                // Reset button
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
         });
 
         // Set minimum date to today
